@@ -1,5 +1,1 @@
-# In this file we define the codeowners for the files in this repository.
-# The codeowners defined here are used to specify who needs to approve a PR such that it can be merged
-
-# After creating your new repository from this template please change the code owners below.
-* @inthemill @habenux @chlab
+@ferrarirosso @bumatt @fabianhutzli @nicoolb

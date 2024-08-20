@@ -1,26 +1,11 @@
-# Project Boilerplate
+# puntobello-installer
 
-This project contains a template to use when creating a new project. It comes with all the standard files which there is expected to be in an open source project on Github. 
+This project contains the code required to build und deploy the different solutions of PUnto Bello Intranet. The content of this project is provided to all the other Punto Bello Solutions as a git submodul. It containes the following components:
 
-## How to use
+- .devcontainer
+- install scripts
+- login scripts
 
-1. Clone this project and copy the files into your own project
-2. Start developing!
-3. Ensure you are in compliance with Mobiliar Open-Source Developer Guide 
-4. If in doubt, get in touch with opensource@mobi.ch
-
-## Readme template
-
-Below you can find a complete readme template for a project (based on [work](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2) by [@PurpleBooth](https://github.com/PurpleBooth)), this will help you communicate the vision and goals of the project as well as answering common questions from future contributors.
-
-The readme file is the single most important documentation of your project, so make sure you spend time on giving a great first impression to new users and provide the needed information to interested contributors.
-
-
----- 
-
-```
-Readme.md template below, when setup is complete, delete all content above this.
-```
 
 
 # _projectname_
