@@ -1,0 +1,28 @@
+{
+	"name": "SPFx build and deployment container",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": { 
+			"ARCH": "arm64"
+		}
+    },
+	"postStartCommand": "pwsh",
+	"forwardPorts": [
+		4321,
+		35729
+	],
+	"portsAttributes": {
+		"4321": {
+			"protocol": "https",
+			"label": "Manifest",
+			"onAutoForward": "silent",
+			"requireLocalPort": true
+		},
+		"35729": {
+			"protocol": "https",
+			"label": "LiveReload",
+			"onAutoForward": "silent",
+			"requireLocalPort": true
+		}
+	}
+}
