@@ -144,6 +144,7 @@ switch ($global:loginSelector) {
         $creds = New-Object System.Management.Automation.PSCredential ($global:adminUser, $global:password)
         $global:PnPCreds = @{
             Credentials = $creds
+            ClientId = $global:delegatedAppId
         }
     }
 }
