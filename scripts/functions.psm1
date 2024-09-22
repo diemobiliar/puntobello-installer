@@ -31,7 +31,7 @@ function Assert-SiteCollection {
         try {
             Write-Information "Creating Site $($Url)"
             New-PnPSite -Type "CommunicationSite" -Title $siteDefinition.Title -Url $Url -Lcid $siteDefinition.LCID -Owner $global:adminUser -Connection $global:cnAdmin    
-            Write-Information "\e[90mWait 30 seconds after site creation`e[0m"
+            Write-Information "`e[90mWait 30 seconds after site creation`e[0m"
             Start-Sleep 30
         }
         catch {
