@@ -65,6 +65,5 @@ switch ($global:loginSelector) {
     6 {
         $global:username = $global:adminUser
         $global:password = ConvertTo-SecureString -String "passwordasstring" -Force -AsPlainText
-        $global:delegatedAppId = "4360f6ed-512f-4ec8-a982-7133419885f6"
     }
 }
