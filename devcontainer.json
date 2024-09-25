@@ -6,6 +6,11 @@
 			"ARCH": "arm64"
 		}
     },
+	"customizations": {
+		"vscode": {
+			"extensions": ["ms-vscode.PowerShell"]
+		}
+	},
 	"postStartCommand": "pwsh",
 	"forwardPorts": [
 		4321,

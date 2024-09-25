@@ -11,35 +11,44 @@
     Start the script with Deploy-SPWP.ps1
 #>
 
-if (Test-Path /proc/1/cgroup) {
-    $importPath = "/usr/local/bin"
+if (Test-Path -Path '/.dockerenv') {
+    $importPath = '/usr/local/bin'
 } else {
-    $importPath = "./.devcontainer/scripts"
+    $importPath = './.devcontainer/scripts'
 }
-Import-Module "$($importPath)/config.psm1" -Force
-Import-Module "$($importPath)/login.psm1" -Force
+Import-Module "$($importPath)/config.psm1" -Force -DisableNameChecking
+Import-Module "$($importPath)/login.psm1" -Force -DisableNameChecking
 
-foreach($solution in (Get-Content ./spo/solutions.json | ConvertFrom-Json).solutions){
+Write-Information "`e[34mDeploying Apps to Tenant App Catalog`e[0m"
+foreach ($solution in (Get-Content ./spo/solutions.json | ConvertFrom-Json).sites.solutions.Name | Sort-Object -Unique) {
     try {
-        $appPath = "$($PWD.Path)/$($solution.solutionName)/sharepoint/solution/$($solution.solutionName).sppkg"
+        $appPath = "$($PWD.Path)/$($solution)/sharepoint/solution/$($solution).sppkg"
         $app = Add-PnPApp -Path $appPath -Overwrite -Connection $global:cnAppCatalog
-        Write-Host "$($app.Title) added."
+        Write-Information "$($app.Title) added."
         Publish-PnPApp -Identity $app.Id -Connection $global:cnAppCatalog
-        Write-Host "$($app.Title) published."
-        foreach($site in $solution.targets){
-            $cnSite = Connect-PnPOnline -Url "https://$($global:M365_TENANTNAME).sharepoint.com/sites/$($site)" @PnPCreds -ReturnConnection
-            $web = Get-PnPWeb -Includes AppTiles -Connection $cnSite
-            if($null -eq ($web.AppTiles | Where-Object {$_.Title -eq $app.Title})){
-                Install-PnPApp -Identity $app.Id -Connection $cnSite
-                Write-Host "$($app.Title) installed."
-            }
-            else {
-                Update-PnPApp -Identity $app.Id -Connection $cnSite
-                Write-Host "$($app.Title) updated."
-            }
+        Write-Information "$($app.Title) published."
+   
+    } catch {
+        Write-Error "Error occurred while processing $($solution): $($_.Exception.Message)" 
+    }
+}
+foreach ($site in (Get-Content ./spo/solutions.json | ConvertFrom-Json).sites) {
+    Write-Information "`e[34mDeploying Apps to site $($site.Url)`e[0m"
+    $cnSite = Connect-PnPOnline -Url "https://$($global:M365_TENANTNAME).sharepoint.com/sites/$($site.Url)" @PnPCreds -ReturnConnection -WarningAction Ignore
+    $web = Get-PnPWeb -Includes AppTiles -Connection $cnSite
+    foreach ($solution in $site.solutions) {
+        $app = Get-PnPApp -Identity $solution.Name -Connection $cnAppCatalog 
+        if ($null -eq ($web.AppTiles | Where-Object { $_.Title -eq $app.Title })) {
+            Install-PnPApp -Identity $app.Id -Connection $cnSite
+            Write-Information "$($app.Title) installed."
+        } else {
+            Update-PnPApp -Identity $app.Id -Connection $cnSite
+            Write-Information "$($app.Title) updated."
+        }
+        if ($null -ne $solution.customAction) {
+            Add-PnPCustomAction -Name $solution.customAction.title -Title $solution.customAction.title -Location $solution.customAction.location -ClientSideComponentId $solution.customAction.clientSideComponentId -ClientSideComponentProperties $solution.customAction.clientSideComponentProperties -Connection $cnSite
+            Write-Information "Custom Action $($solution.customAction.title) added."
         }
     }
-    catch {
-        Write-Host "Error occurred while processing $($wp.FullName): $($_.Exception.Message)" -ForegroundColor Red
-    }
 }
+Write-Information "`e[32mApp deployment completed`e[0m"

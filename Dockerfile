@@ -40,7 +40,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/nodejs:18.20.3-
     SPFX_VERSION=1.18.2 \
     YEOMAN_VERSION=5.0.0 \
     M365CLI_VERSION=7.3.0 \
-    PNP_VERSION=2.10.0 \
+    PNP_VERSION=2.12.0 \
     AZ_VERSION=12.2.0
 
     ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
@@ -58,12 +58,15 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/nodejs:18.20.3-
 
     RUN --mount=type=cache,target=/var/cache/tdnf,rw \
         tdnf update -y \
-        && tdnf install -y icu less openssh-clients ca-certificates dotnet-runtime-7.0 tar awk shadow-utils \
+        && tdnf install -y icu less openssh-clients ca-certificates git dotnet-runtime-7.0 tar awk shadow-utils terraform azure-cli \
         && tdnf upgrade -y \
         && tdnf clean all
 
     # # Install NPM Tooling
     RUN npm install gulp-cli yo@${YEOMAN_VERSION} @microsoft/generator-sharepoint@${SPFX_VERSION} @pnp/cli-microsoft365@${M365CLI_VERSION} --global
+
+    # Install azd
+    RUN curl -fsSL https://aka.ms/install-azd.sh | bash
 
         # Give all user execute permissions and remove write permissions for others
     RUN chmod a+x,o-w ${PS_INSTALL_FOLDER}/pwsh \
