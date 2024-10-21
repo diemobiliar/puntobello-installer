@@ -18,6 +18,7 @@ if (Test-Path -Path '/.dockerenv') {
 }
 Import-Module "$($importPath)/config.psm1" -Force -DisableNameChecking
 Import-Module "$($importPath)/login.psm1" -Force -DisableNameChecking
+Import-Module "$($importPath)/functions.psm1" -Force -DisableNameChecking
 
 Write-Information "`e[34mDeploying Apps to Tenant App Catalog`e[0m"
 foreach ($solution in (Get-Content ./spo/solutions.json | ConvertFrom-Json).sites.solutions.Name | Sort-Object -Unique) {
