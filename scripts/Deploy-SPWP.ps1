@@ -49,6 +49,9 @@ foreach ($site in (Get-Content ./spo/solutions.json | ConvertFrom-Json).sites) {
             Add-PnPCustomAction -Name $solution.customAction.title -Title $solution.customAction.title -Location $solution.customAction.location -ClientSideComponentId $solution.customAction.clientSideComponentId -ClientSideComponentProperties $solution.customAction.clientSideComponentProperties -Connection $cnSite
             Write-Information "Custom Action $($solution.customAction.title) added."
         }
+        if ($solution.applicationCustomizer -eq $true){
+            Add-ApplicationCustomizer -solution $solution -urlStub $($site.Url)
+        }
     }
 }
 Write-Information "`e[32mApp deployment completed`e[0m"

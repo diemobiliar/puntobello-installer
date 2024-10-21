@@ -212,3 +212,50 @@ function Add-SitePagesFields {
     }
 }
 Export-ModuleMember -Function Add-SitePagesFields
+
+<#
+.SYNOPSIS
+    Add application customizer for a specific SPFx solution
+
+.DESCRIPTION
+    Add the application customizer by reading the component id from the solutions manifest.
+
+.PARAMETER $solution
+    SPFx solution to add the application customizer
+
+.PARAMETER $connection
+    PnP Connection to connect to target site
+
+.EXAMPLE
+    Add-ApplicationCustomizer -solution $solution -connection $cnSite
+
+.NOTES
+    This function requires the PnP PowerShell module and appropriate permissions to add appliation customizer.
+#>
+function Add-ApplicationCustomizer {
+    param (
+        [Parameter()]
+        [PSObject]$solution,
+        [String]$urlStub
+    )
+
+    try {
+        $siteUrl = "https://$($global:M365_TENANTNAME).sharepoint.com/sites/$($urlStub)"
+        $cnSite = Connect-PnPOnline -Url $siteUrl @global:PnPCreds -ReturnConnection -WarningAction Ignore
+        
+        $configFile = Get-Content "$($solution.Name)/config/config.json" -Raw | ConvertFrom-Json
+        $bundleName = ($configFile.bundles | Get-Member -MemberType NoteProperty).Name
+        $componentManifest = $configFile.bundles.$bundleName.components.manifest
+        $manifestFile = Get-Content "$($solution.Name)/$componentManifest" -Raw | ConvertFrom-Json
+        $clientSiteComponentId = $manifestFile.id
+        Remove-PnPApplicationCustomizer -ClientSideComponentId $clientSiteComponentId -Force -Connection $cnSite
+        Start-Sleep -Seconds 1
+        Add-PnPApplicationCustomizer -Title $($solution.Name) -ClientSideComponentId $clientSiteComponentId -Connection $cnSite
+        Write-Host "Succesfully added Application Customizer."
+    }
+    catch {
+        $exception = Get-PnPException
+        throw "Something went wrong adding Application Customizer: $($exception.Message)"
+    }
+}
+Export-ModuleMember -Function Add-ApplicationCustomizer
