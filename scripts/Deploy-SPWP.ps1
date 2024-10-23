@@ -18,6 +18,7 @@ if (Test-Path -Path '/.dockerenv') {
 }
 Import-Module "$($importPath)/config.psm1" -Force -DisableNameChecking
 Import-Module "$($importPath)/login.psm1" -Force -DisableNameChecking
+Import-Module "$($importPath)/functions.psm1" -Force -DisableNameChecking
 
 Write-Information "`e[34mDeploying Apps to Tenant App Catalog`e[0m"
 foreach ($solution in (Get-Content ./spo/solutions.json | ConvertFrom-Json).sites.solutions.Name | Sort-Object -Unique) {
@@ -48,6 +49,9 @@ foreach ($site in (Get-Content ./spo/solutions.json | ConvertFrom-Json).sites) {
         if ($null -ne $solution.customAction) {
             Add-PnPCustomAction -Name $solution.customAction.title -Title $solution.customAction.title -Location $solution.customAction.location -ClientSideComponentId $solution.customAction.clientSideComponentId -ClientSideComponentProperties $solution.customAction.clientSideComponentProperties -Connection $cnSite
             Write-Information "Custom Action $($solution.customAction.title) added."
+        }
+        if ($solution.applicationCustomizer -eq $true){
+            Add-ApplicationCustomizer -solution $solution -urlStub $($site.Url)
         }
     }
 }
