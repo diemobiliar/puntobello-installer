@@ -6,7 +6,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS ins
 
     # Define Args for the needed to add the package
     ARG ARCH=amd64 \
-        PS_VERSION=7.4.5 \
+        PS_VERSION=7.4.6 \
         PS_INSTALL_VERSION=7 \
         PS_PACKAGE_URL_BASE64
 
@@ -22,11 +22,11 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS ins
 
     RUN if [[ "${ARCH}" == "arm64" ]]; then \
             curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-arm64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='f0968649ecd47d5500ccb766c4ff4da34e0d78254cce9098c7f42d0e5484b513' \
+            && pwsh_sha256='c0159b03e85f44ae1e7697818a011558da6c813d0aae848bf5ac13bf435d8624' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         else \
             curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-x64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='c23509cc4d08c62b9ff6ea26f579ee4c50f978aa34269334a85eda2fec36f45b' \
+            && pwsh_sha256='6f6015203c47806c5cc444c19d8ed019695e610fbd948154264bf9ca8e157561' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         fi && \
         tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
@@ -36,12 +36,12 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/nodejs:18.20.3-
     # Define Args and Env needed to create links
     ARG ARCH=amd64 \
     PS_INSTALL_VERSION=7 \
-    PS_VERSION=7.4.5 \
+    PS_VERSION=7.4.6 \
     SPFX_VERSION=1.18.2 \
     YEOMAN_VERSION=5.0.0 \
-    M365CLI_VERSION=7.3.0 \
+    M365CLI_VERSION=10.0.0 \
     PNP_VERSION=2.12.0 \
-    AZ_VERSION=12.2.0
+    AZ_VERSION=12.4.0
 
     ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
         \
