@@ -51,7 +51,8 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/nodejs:18.20.3-
         LANG=en_US.UTF-8 \
         # set a fixed location for the Module analysis cache
         PSModuleAnalysisCachePath=/var/cache/microsoft/powershell/PSModuleAnalysisCache/ModuleAnalysisCache \
-        POWERSHELL_DISTRIBUTION_CHANNEL=PSDocker-${ARCH}-Mariner-2
+        POWERSHELL_DISTRIBUTION_CHANNEL=PSDocker-${ARCH}-Mariner-2 \
+        PNPPOWERSHELL_UPDATECHECK=false
 
     # Copy only the files we need from the previous stage
     COPY --from=installer-env ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
