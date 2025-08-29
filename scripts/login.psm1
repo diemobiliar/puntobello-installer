@@ -133,7 +133,7 @@ switch ($global:loginSelector) {
             grant_type    = "client_credentials"
             client_id     = $global:appId
             client_secret = $global:appSecret
-            resource      = "https://$($global:M365_TENANT_NAME).sharepoint.com/"
+            resource      = "https://$($global:M365_TENANTNAME).sharepoint.com/"
         }
         $response = Invoke-RestMethod -Uri $tokenEndpoint -Method Post -Body $body
         $global:PnPCreds = @{
