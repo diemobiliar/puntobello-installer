@@ -6,7 +6,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS ins
 
     # Define Args for the needed to add the package
     ARG ARCH=amd64 \
-        PS_VERSION=7.4.6 \
+        PS_VERSION=7.5.2 \
         PS_INSTALL_VERSION=7 \
         PS_PACKAGE_URL_BASE64
 
@@ -20,28 +20,29 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS ins
         tdnf update -y \
         && tdnf install -y ca-certificates tar
 
-    RUN if [[ "${ARCH}" == "arm64" ]]; then \
-            curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-arm64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='c0159b03e85f44ae1e7697818a011558da6c813d0aae848bf5ac13bf435d8624' \
+    RUN if [[ "${ARCH}" == "amd64" ]]; then \
+            curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-amd64.tar.gz -o /tmp/powershell.tar.gz \
+            && pwsh_sha256='d4d2c55628755f5cd8b2609ad7117c1eada0aa0086f195d48131ee482ef7d71a' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         else \
             curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-x64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='6f6015203c47806c5cc444c19d8ed019695e610fbd948154264bf9ca8e157561' \
+            && pwsh_sha256='8fa9584f6f95d29ca1466c4397ac39c371373d6581c12dfae9ebd53c06d77664' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         fi && \
         tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
 
-FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/nodejs:18.20.3-1-cm2.0.20240731-${ARCH} AS final-image
+FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS final-image
 
     # Define Args and Env needed to create links
     ARG ARCH=amd64 \
     PS_INSTALL_VERSION=7 \
-    PS_VERSION=7.4.6 \
-    SPFX_VERSION=1.18.2 \
-    YEOMAN_VERSION=5.0.0 \
-    M365CLI_VERSION=10.0.0 \
-    PNP_VERSION=2.12.0 \
-    AZ_VERSION=12.4.0
+    PS_VERSION=7.5.2 \
+    SPFX_VERSION=1.21.1 \
+    YEOMAN_VERSION=5.1.0 \
+    M365CLI_VERSION=10.9.0 \
+    PNP_VERSION=3.1.0 \
+    AZ_VERSION=14.2.0 \
+    NODE_VERSION=22.15.0
 
     ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
         \
@@ -62,6 +63,14 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/nodejs:18.20.3-
         && tdnf install -y icu less openssh-clients ca-certificates git dotnet-runtime-7.0 tar awk shadow-utils terraform azure-cli \
         && tdnf upgrade -y \
         && tdnf clean all
+
+    RUN curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH}.tar.xz -o /tmp/node.tar.xz \
+        && mkdir -p /usr/local/lib/nodejs \
+        && tar -xJf /tmp/node.tar.xz -C /usr/local/lib/nodejs \
+        && ln -s /usr/local/lib/nodejs/node-v${NODE_VERSION}-linux-${ARCH}/bin/node /usr/bin/node \
+        && ln -s /usr/local/lib/nodejs/node-v${NODE_VERSION}-linux-${ARCH}/bin/npm /usr/bin/npm \
+        && ln -s /usr/local/lib/nodejs/node-v${NODE_VERSION}-linux-${ARCH}/bin/npx /usr/bin/npx \
+        && node --version && npm --version
 
     # # Install NPM Tooling
     RUN npm install gulp-cli yo@${YEOMAN_VERSION} @microsoft/generator-sharepoint@${SPFX_VERSION} @pnp/cli-microsoft365@${M365CLI_VERSION} --global
