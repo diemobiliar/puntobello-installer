@@ -37,7 +37,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS fin
     ARG ARCH=amd64 \
     PS_INSTALL_VERSION=7 \
     PS_VERSION=7.5.2 \
-    SPFX_VERSION=1.21.1 \
+    SPFX_VERSION=1.22.1 \
     YEOMAN_VERSION=5.1.0 \
     M365CLI_VERSION=10.9.0 \
     PNP_VERSION=3.1.0 \
@@ -73,7 +73,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS fin
         && node --version && npm --version
 
     # # Install NPM Tooling
-    RUN npm install gulp-cli yo@${YEOMAN_VERSION} @microsoft/generator-sharepoint@${SPFX_VERSION} @pnp/cli-microsoft365@${M365CLI_VERSION} --global
+    RUN npm install yo@${YEOMAN_VERSION} @microsoft/generator-sharepoint@${SPFX_VERSION} @pnp/cli-microsoft365@${M365CLI_VERSION} --global
 
     # Install azd
     RUN curl -fsSL https://aka.ms/install-azd.sh | bash
