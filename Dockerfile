@@ -3,8 +3,6 @@
 
 ARG ARCH=amd64
 
-## if mobi
-FROM diemobiliar.azurecr.io/cac-cacerts-image:29 AS mobi-cacerts
 FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS installer-env
 
     # Define Args for the needed to add the package
