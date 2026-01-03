@@ -1,12 +1,11 @@
 # This Dockerfile is based on PowerShell Docker files
 # Source: https://github.com/PowerShell/PowerShell-Docker/
 
-ARG ARCH=amd64
-
-FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS installer-env
+ARG ARCH=arm64
+FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS installer-env
 
     # Define Args for the needed to add the package
-    ARG ARCH=amd64 \
+    ARG ARCH=arm64 \
         PS_VERSION=7.5.4 \
         PS_INSTALL_VERSION=7 \
         PS_PACKAGE_URL_BASE64
@@ -21,29 +20,31 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS ins
         tdnf update -y \
         && tdnf install -y ca-certificates tar
 
-    RUN if [[ "${ARCH}" == "arm64" ]]; then \
-            curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-arm64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='4b32d4cb86a43dfb83d5602d0294295bf22fafbf9e0785d1aaef81938cda92f8' \
-            && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
-        else \
+    RUN if [[ "${ARCH}" == "amd64" ]]; then \
             curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-x64.tar.gz -o /tmp/powershell.tar.gz \
             && pwsh_sha256='1fd7983fe56ca9e6233f126925edb24bf6b6b33e356b69996d925c4db94e2fef' \
+            && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
+        else \
+            curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-arm64.tar.gz -o /tmp/powershell.tar.gz \
+            && pwsh_sha256='4b32d4cb86a43dfb83d5602d0294295bf22fafbf9e0785d1aaef81938cda92f8' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         fi && \
         tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
 
-FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS final-image
+FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS final-image
 
     # Define Args and Env needed to create links
-    ARG ARCH=amd64 \
+    ARG ARCH=arm64 \
+    DOTNET_RUNTIME_VERSION=8.0 \
     PS_INSTALL_VERSION=7 \
     PS_VERSION=7.5.4 \
-    SPFX_VERSION=1.21.1 \
+    SPFX_VERSION=1.22.1 \
     YEOMAN_VERSION=5.1.0 \
     M365CLI_VERSION=10.9.0 \
     PNP_VERSION=3.1.0 \
     AZ_VERSION=14.2.0 \
-    NODE_VERSION=22.15.0
+    NODE_VERSION=22.15.0 \
+    TERRAFORM_VERSION=1.7.0
 
     ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
         \
@@ -61,9 +62,15 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS fin
 
     RUN --mount=type=cache,target=/var/cache/tdnf,rw \
         tdnf update -y \
-        && tdnf install -y icu less openssh-clients ca-certificates git dotnet-runtime-7.0 tar awk shadow-utils terraform azure-cli \
+        && tdnf install -y icu less openssh-clients ca-certificates git unzip dotnet-runtime-${DOTNET_RUNTIME_VERSION} tar awk shadow-utils azure-cli \
         && tdnf upgrade -y \
         && tdnf clean all
+
+    RUN curl -fsSL https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip -o terraform.zip && \
+        unzip terraform.zip && \
+        mv terraform /usr/local/bin/ && \
+        chmod +x /usr/local/bin/terraform && \
+        rm terraform.zip
 
     RUN NODE_ARCH=$([ "${ARCH}" = "amd64" ] && echo "x64" || echo "${ARCH}") && \
         curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -o /tmp/node.tar.xz \
@@ -75,7 +82,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/cbl-mariner/base/core:2.0 AS fin
         && node --version && npm --version
 
     # # Install NPM Tooling
-    RUN npm install gulp-cli yo@${YEOMAN_VERSION} @microsoft/generator-sharepoint@${SPFX_VERSION} @pnp/cli-microsoft365@${M365CLI_VERSION} --global
+    RUN npm install yo@${YEOMAN_VERSION} @microsoft/generator-sharepoint@${SPFX_VERSION} @pnp/cli-microsoft365@${M365CLI_VERSION} --global
 
     # Install azd
     RUN curl -fsSL https://aka.ms/install-azd.sh | bash
