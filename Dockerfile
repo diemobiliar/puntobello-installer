@@ -6,7 +6,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS inst
 
     # Define Args for the needed to add the package
     ARG ARCH=arm64 \
-        PS_VERSION=7.5.4 \
+        PS_VERSION=7.6.0 \
         PS_INSTALL_VERSION=7 \
         PS_PACKAGE_URL_BASE64
 
@@ -22,11 +22,11 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS inst
 
     RUN if [[ "${ARCH}" == "amd64" ]]; then \
             curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-x64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='1fd7983fe56ca9e6233f126925edb24bf6b6b33e356b69996d925c4db94e2fef' \
+            && pwsh_sha256='04517472cf57d7f9cbd93897da9bed467c73ca6063c29d7655ebc20aa1d6023f' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         else \
             curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-arm64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='4b32d4cb86a43dfb83d5602d0294295bf22fafbf9e0785d1aaef81938cda92f8' \
+            && pwsh_sha256='dddf7564fb3b52dc26be5580fc5b4e08eb3fa65b094488aae6d4b3cad5fea460' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         fi && \
         tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
@@ -37,14 +37,14 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS fina
     ARG ARCH=arm64 \
     DOTNET_RUNTIME_VERSION=8.0 \
     PS_INSTALL_VERSION=7 \
-    PS_VERSION=7.5.4 \
+    PS_VERSION=7.6.0 \
     SPFX_VERSION=1.22.1 \
     YEOMAN_VERSION=5.1.0 \
-    M365CLI_VERSION=10.9.0 \
+    M365CLI_VERSION=11.5.0 \
     PNP_VERSION=3.1.0 \
-    AZ_VERSION=14.2.0 \
+    AZ_VERSION=15.4.0 \
     NODE_VERSION=22.15.0 \
-    TERRAFORM_VERSION=1.7.0
+    TERRAFORM_VERSION=1.14.8
 
     ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
         \
