@@ -35,7 +35,6 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS fina
 
     # Define Args and Env needed to create links
     ARG ARCH=arm64 \
-    DOTNET_RUNTIME_VERSION=10.0 \
     PS_INSTALL_VERSION=7 \
     PS_VERSION=7.6.5 \
     SPFX_VERSION=1.22.1 \
@@ -62,7 +61,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS fina
 
     RUN --mount=type=cache,target=/var/cache/tdnf,rw \
         tdnf update -y \
-        && tdnf install -y icu less openssh-clients ca-certificates git unzip dotnet-runtime-${DOTNET_RUNTIME_VERSION} tar awk shadow-utils azure-cli \
+        && tdnf install -y icu less openssh-clients ca-certificates git unzip tar awk shadow-utils azure-cli \
         && tdnf upgrade -y \
         && tdnf clean all
 
