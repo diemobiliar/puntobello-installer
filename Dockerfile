@@ -6,7 +6,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS inst
 
     # Define Args for the needed to add the package
     ARG ARCH=arm64 \
-        PS_VERSION=7.6.0 \
+        PS_VERSION=7.6.5 \
         PS_INSTALL_VERSION=7 \
         PS_PACKAGE_URL_BASE64
 
@@ -22,11 +22,11 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS inst
 
     RUN if [[ "${ARCH}" == "amd64" ]]; then \
             curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-x64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='04517472cf57d7f9cbd93897da9bed467c73ca6063c29d7655ebc20aa1d6023f' \
+            && pwsh_sha256='b34ab3b19acac1d3d4d0d3cfdb02acf62f457b0b6a962ff008132033f7566844' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         else \
             curl -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-arm64.tar.gz -o /tmp/powershell.tar.gz \
-            && pwsh_sha256='dddf7564fb3b52dc26be5580fc5b4e08eb3fa65b094488aae6d4b3cad5fea460' \
+            && pwsh_sha256='ed4084f215d8bce2edd23aa7cb1f1e7b0818e41363a635a22065d2701b6141df' \
             && echo "$pwsh_sha256  /tmp/powershell.tar.gz" | sha256sum -c - ; \
         fi && \
         tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
@@ -35,16 +35,15 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS fina
 
     # Define Args and Env needed to create links
     ARG ARCH=arm64 \
-    DOTNET_RUNTIME_VERSION=8.0 \
     PS_INSTALL_VERSION=7 \
-    PS_VERSION=7.6.0 \
+    PS_VERSION=7.6.5 \
     SPFX_VERSION=1.22.1 \
     YEOMAN_VERSION=5.1.0 \
-    M365CLI_VERSION=11.5.0 \
-    PNP_VERSION=3.1.0 \
-    AZ_VERSION=15.4.0 \
+    M365CLI_VERSION=11.11.0 \
+    PNP_VERSION=3.4.1 \
+    AZ_VERSION=16.3.0 \
     NODE_VERSION=22.15.0 \
-    TERRAFORM_VERSION=1.14.8
+    TERRAFORM_VERSION=1.16.1
 
     ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
         \
@@ -62,7 +61,7 @@ FROM --platform=linux/${ARCH} mcr.microsoft.com/azurelinux/base/core:3.0 AS fina
 
     RUN --mount=type=cache,target=/var/cache/tdnf,rw \
         tdnf update -y \
-        && tdnf install -y icu less openssh-clients ca-certificates git unzip dotnet-runtime-${DOTNET_RUNTIME_VERSION} tar awk shadow-utils azure-cli \
+        && tdnf install -y icu less openssh-clients ca-certificates git unzip tar awk shadow-utils azure-cli \
         && tdnf upgrade -y \
         && tdnf clean all
 
